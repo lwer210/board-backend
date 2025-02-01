@@ -16,7 +16,7 @@ public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_SEQ")
+    @Column(name = "user_seq")
     @Comment("사용자 시퀀스")
     private Long id;
 
