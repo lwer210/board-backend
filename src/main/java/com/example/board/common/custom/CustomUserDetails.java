@@ -18,19 +18,19 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(this.userEntity.getRole().split(","))
+        return Arrays.stream(userEntity.getRole().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 
     @Override
     public String getPassword() {
-        return this.userEntity.getPassword();
+        return userEntity.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.userEntity.getEmail();
+        return userEntity.getEmail();
     }
 
     @Override
