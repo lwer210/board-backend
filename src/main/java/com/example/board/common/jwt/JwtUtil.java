@@ -46,7 +46,7 @@ public class JwtUtil {
         UserEntity user = userEntityRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없음"));// TODO 커스텀 예외로 변경 필요
 
-        Date accessExpired = new Date(nowLong * 24 * 60 * 60 * 1000);
+        Date accessExpired = new Date(nowLong + 24 * 60 * 60 * 1000);
         String accessToken = Jwts.builder()
                 .setSubject("access")
                 .setIssuedAt(now)
@@ -56,7 +56,7 @@ public class JwtUtil {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        Date refreshExpired = new Date(nowLong * 7 * 24 * 60 * 60 * 1000);
+        Date refreshExpired = new Date(nowLong + 7 * 24 * 60 * 60 * 1000);
         String refreshToken = Jwts.builder()
                 .setSubject("refresh")
                 .setIssuedAt(now)
@@ -97,7 +97,7 @@ public class JwtUtil {
         try{
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         }catch (Exception e){
-            throw new RuntimeException("parseToken 메소드 예외 발생"); // TODO 커스텀 예외로 교체 필요
+            throw new RuntimeException(e.getMessage()); // TODO 커스텀 예외로 교체 필요
         }
     }
 
