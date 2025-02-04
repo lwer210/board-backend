@@ -1,6 +1,7 @@
 package com.example.board.auth.service;
 
 import com.example.board.auth.controller.request.LoginRequest;
+import com.example.board.auth.controller.request.RefreshRequest;
 import com.example.board.auth.controller.request.RegisterRequest;
 import com.example.board.auth.controller.response.LoginResponse;
 import com.example.board.auth.controller.response.RegisterResponse;
@@ -96,6 +97,50 @@ public class AuthService {
         }
 
         refreshTokenEntityRepository.save(refreshEntity);
+
+        return LoginResponse.builder()
+                .nickname(user.getNickname())
+                .dto(jwtDto)
+                .build();
+    }
+
+    @Transactional
+    public LoginResponse refresh(RefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
+        Claims claims = jwtUtil.parseToken(refreshToken);
+
+        Date expiration = claims.getExpiration();
+        RefreshTokenEntity refreshTokenEntity = refreshTokenEntityRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("토큰을 찾을 수 없습니다."));// TODO 커스텀 예외 교체 필요
+
+        if(refreshTokenEntity.getUseYn().equals("N") || expiration.before(new Date())){
+            throw new RuntimeException("만료된 토큰"); // TODO 커스텀 예외 교체 필요
+        }
+
+        Authentication authentication = jwtUtil.getAuthentication(refreshToken);
+        JwtDto jwtDto = jwtUtil.generatedToken(authentication);
+
+        String newRefreshToken = jwtDto.getRefreshToken();
+        Claims newClaims = jwtUtil.parseToken(newRefreshToken);
+
+        LocalDateTime expired = newClaims.getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime issuedAt = newClaims.getIssuedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        Long id = newClaims.get("id", Long.class);
+        UserEntity user = userEntityRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));// TODO 커스텀 예외 교체 필요
+
+        RefreshTokenEntity newRefreshEntity = RefreshTokenEntity.builder()
+                .token(newRefreshToken)
+                .expiredAt(expired)
+                .issuedAt(issuedAt)
+                .useYn("Y")
+                .userId(user.getId())
+                .build();
+
+        refreshTokenEntityRepository.delete(refreshTokenEntity);
+
+        refreshTokenEntityRepository.save(newRefreshEntity);
 
         return LoginResponse.builder()
                 .nickname(user.getNickname())
