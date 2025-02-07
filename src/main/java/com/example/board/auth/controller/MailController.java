@@ -1,7 +1,11 @@
 package com.example.board.auth.controller;
 
+import com.example.board.auth.controller.request.PasswordResetRequest;
 import com.example.board.auth.service.MailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,5 +16,9 @@ public class MailController {
 
     private final MailService mailService;
 
-
+    @PostMapping("/password/reset")
+    public ResponseEntity<?> reset(@RequestBody PasswordResetRequest request){
+        mailService.reset(request);
+        return null;
+    }
 }
