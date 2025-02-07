@@ -4,7 +4,7 @@ import com.example.board.auth.controller.request.LoginRequest;
 import com.example.board.auth.controller.request.RefreshRequest;
 import com.example.board.auth.controller.request.RegisterRequest;
 import com.example.board.auth.controller.response.LoginResponse;
-import com.example.board.auth.controller.response.RegisterResponse;
+import com.example.board.auth.controller.response.UserResponse;
 import com.example.board.auth.persistence.entity.RefreshTokenEntity;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.RefreshTokenEntityRepository;
@@ -35,7 +35,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public RegisterResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
         if(userEntityRepository.existsByNickname(request.getNickname())) {
             throw new RuntimeException("이미 존재하는 닉네임입니다.");
         }
@@ -53,7 +53,7 @@ public class AuthService {
 
         UserEntity saveEntity = userEntityRepository.save(entity);
 
-        return RegisterResponse.builder()
+        return UserResponse.builder()
                 .nickname(saveEntity.getNickname())
                 .email(saveEntity.getEmail())
                 .id(saveEntity.getId())
