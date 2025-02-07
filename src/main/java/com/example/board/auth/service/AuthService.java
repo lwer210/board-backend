@@ -1,6 +1,7 @@
 package com.example.board.auth.service;
 
 import com.example.board.auth.controller.request.LoginRequest;
+import com.example.board.auth.controller.request.PasswordUpdateRequest;
 import com.example.board.auth.controller.request.RefreshRequest;
 import com.example.board.auth.controller.request.RegisterRequest;
 import com.example.board.auth.controller.response.LoginResponse;
@@ -9,6 +10,7 @@ import com.example.board.auth.persistence.entity.RefreshTokenEntity;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.RefreshTokenEntityRepository;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
+import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.jwt.JwtDto;
 import com.example.board.common.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -145,6 +147,36 @@ public class AuthService {
         return LoginResponse.builder()
                 .nickname(user.getNickname())
                 .dto(jwtDto)
+                .build();
+    }
+
+    public UserResponse updatePassword(PasswordUpdateRequest request, CustomUserDetails userDetails) {
+        if(userDetails == null){
+            throw new RuntimeException("인증되지 않은 사용자 입니다."); // TODO 커스텀 예외 교체 필요
+        }
+
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if(!newPassword.equals(confirmPassword)){
+            throw new RuntimeException("새 비밀번호가 일치하지 않습니다."); // TODO 커스텀 예외 교체 필요
+        }
+
+        UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+        String encodeNewPassword = passwordEncoder.encode(newPassword);
+
+        user.setPassword(encodeNewPassword);
+
+        UserEntity newUser = userEntityRepository.save(user);
+
+        return UserResponse.builder()
+                .id(newUser.getId())
+                .email(newUser.getEmail())
+                .nickname(user.getNickname())
+                .role(newUser.getRole())
+                .createdAt(newUser.getCreatedAt())
+                .updatedAt(newUser.getUpdatedAt())
                 .build();
     }
 }
