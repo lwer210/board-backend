@@ -4,9 +4,8 @@ import com.example.board.auth.controller.request.LoginRequest;
 import com.example.board.auth.controller.request.RefreshRequest;
 import com.example.board.auth.controller.request.RegisterRequest;
 import com.example.board.auth.controller.response.LoginResponse;
-import com.example.board.auth.controller.response.RegisterResponse;
+import com.example.board.auth.controller.response.UserResponse;
 import com.example.board.auth.service.AuthService;
-import com.example.board.common.jwt.JwtDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Auth API Controller")
+@Tag(name = "Auth API Controller", description = "사용자 Auth API Controller")
 public class AuthController {
 
     private final AuthService authService;
@@ -32,10 +31,10 @@ public class AuthController {
     @Operation(summary = "사용자 회원가입 API", description = "사용자 회원가입 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = RegisterResponse.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
             }, description = "회원가입 성공 시 반환")
     })
-    public ResponseEntity<RegisterResponse> register(
+    public ResponseEntity<UserResponse> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     description = "사용자 회원가입 요청 객체",
