@@ -1,23 +1,25 @@
 package com.example.board.auth.controller;
 
 import com.example.board.auth.controller.request.LoginRequest;
+import com.example.board.auth.controller.request.PasswordUpdateRequest;
 import com.example.board.auth.controller.request.RefreshRequest;
 import com.example.board.auth.controller.request.RegisterRequest;
 import com.example.board.auth.controller.response.LoginResponse;
 import com.example.board.auth.controller.response.UserResponse;
 import com.example.board.auth.service.AuthService;
+import com.example.board.common.custom.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -79,5 +81,25 @@ public class AuthController {
             @RequestBody RefreshRequest request
     ) {
         return ResponseEntity.ok(authService.refresh(request));
+    }
+
+    @Operation(summary = "비밀번호 재설정 API", description = "사용자 비밀번호 재설정 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+            })
+    })
+    @PatchMapping("/password/update")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<UserResponse> updatePassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "비밀번호 재설정 요청 객체",
+                    content = @Content(schema = @Schema(implementation = PasswordUpdateRequest.class))
+            )
+            @RequestBody PasswordUpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        return ResponseEntity.ok(authService.updatePassword(request, userDetails));
     }
 }
