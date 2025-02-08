@@ -4,9 +4,12 @@ import com.example.board.auth.controller.request.PasswordResetRequest;
 import com.example.board.auth.controller.response.UserResponse;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
+import com.example.board.common.exception.EmailSendFailedException;
+import com.example.board.common.exception.UserNotFoundException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,7 +33,7 @@ public class MailService {
     public UserResponse reset(PasswordResetRequest request) {
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));// TODO 커스텀 예외로 교체 필요
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 사용자입니다."));
 
         String newPassword = randPassword();
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -71,7 +74,7 @@ public class MailService {
                     .build();
 
         }catch(Exception e){
-            throw new RuntimeException("이메일 발송에 실패하였습니다."); // TODO 커스텀 예외 교체 필요
+            throw new EmailSendFailedException();
         }
     }
 

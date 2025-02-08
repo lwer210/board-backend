@@ -11,6 +11,7 @@ import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.RefreshTokenEntityRepository;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
 import com.example.board.common.custom.CustomUserDetails;
+import com.example.board.common.exception.*;
 import com.example.board.common.jwt.JwtDto;
 import com.example.board.common.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -39,11 +40,11 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if(userEntityRepository.existsByNickname(request.getNickname())) {
-            throw new RuntimeException("이미 존재하는 닉네임입니다.");
+            throw new AlreadyRegisteredNickname();
         }
 
         if(userEntityRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new AlreadyRegisteredEmail();
         }
 
         UserEntity entity = UserEntity.builder()
@@ -84,7 +85,7 @@ public class AuthService {
         Long id = claims.get("id", Long.class);
 
         UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));// TODO 커스텀 예외 변경 필요
+                .orElseThrow(UserNotFoundException::new);
 
         RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
                 .expiredAt(expired)
@@ -113,10 +114,10 @@ public class AuthService {
 
         Date expiration = claims.getExpiration();
         RefreshTokenEntity refreshTokenEntity = refreshTokenEntityRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("토큰을 찾을 수 없습니다."));// TODO 커스텀 예외 교체 필요
+                .orElseThrow(TokenNotFoundException::new);
 
         if(refreshTokenEntity.getUseYn().equals("N") || expiration.before(new Date())){
-            throw new RuntimeException("만료된 토큰"); // TODO 커스텀 예외 교체 필요
+            throw new ExpiredTokenException();
         }
 
         Authentication authentication = jwtUtil.getAuthentication(refreshToken);
@@ -130,7 +131,7 @@ public class AuthService {
 
         Long id = newClaims.get("id", Long.class);
         UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));// TODO 커스텀 예외 교체 필요
+                .orElseThrow(UserNotFoundException::new);
 
         RefreshTokenEntity newRefreshEntity = RefreshTokenEntity.builder()
                 .token(newRefreshToken)
@@ -152,18 +153,18 @@ public class AuthService {
 
     public UserResponse updatePassword(PasswordUpdateRequest request, CustomUserDetails userDetails) {
         if(userDetails == null){
-            throw new RuntimeException("인증되지 않은 사용자 입니다."); // TODO 커스텀 예외 교체 필요
+            throw new UnauthorizedException();
         }
 
         String newPassword = request.getNewPassword();
         String confirmPassword = request.getConfirmPassword();
 
         if(!newPassword.equals(confirmPassword)){
-            throw new RuntimeException("새 비밀번호가 일치하지 않습니다."); // TODO 커스텀 예외 교체 필요
+            throw new NewPasswordNotMatchesException();
         }
 
         UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+                .orElseThrow(UserNotFoundException::new);
         String encodeNewPassword = passwordEncoder.encode(newPassword);
 
         user.setPassword(encodeNewPassword);

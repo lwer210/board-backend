@@ -3,6 +3,9 @@ package com.example.board.common.jwt;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
 import com.example.board.common.custom.CustomUserDetails;
+import com.example.board.common.exception.NotContainsRoleException;
+import com.example.board.common.exception.ParseTokenException;
+import com.example.board.common.exception.UserNotFoundException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,7 +16,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -44,7 +46,7 @@ public class JwtUtil {
 
         String email = authentication.getName();
         UserEntity user = userEntityRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없음"));// TODO 커스텀 예외로 변경 필요
+                .orElseThrow(UserNotFoundException::new);
 
         Date accessExpired = new Date(nowLong + 24 * 60 * 60 * 1000);
         String accessToken = Jwts.builder()
@@ -78,7 +80,7 @@ public class JwtUtil {
         Claims claims = parseToken(token);
 
         if(claims.get("auth") == null){
-            throw new RuntimeException("토큰에 권한 정보가 없습니다."); // TODO 커스텀 예외로 교체 필요
+            throw new NotContainsRoleException("토큰에 권한 정보가 없습니다.");
         }
 
         Collection<? extends GrantedAuthority> auth = Arrays.stream(claims.get("auth").toString().split(","))
@@ -87,7 +89,7 @@ public class JwtUtil {
 
         Long id = claims.get("id", Long.class);
         UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾지 못했습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         return new UsernamePasswordAuthenticationToken(userDetails, null, auth);
@@ -97,7 +99,7 @@ public class JwtUtil {
         try{
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         }catch (Exception e){
-            throw new RuntimeException(e.getMessage()); // TODO 커스텀 예외로 교체 필요
+            throw new ParseTokenException(e.getMessage(), e);
         }
     }
 
