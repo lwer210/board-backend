@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,18 +39,18 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if(userEntityRepository.existsByNickname(request.getNickname())) {
-            throw new AlreadyRegisteredNickname();
+            throw new AlreadyRegisteredNicknameException();
         }
 
         if(userEntityRepository.existsByEmail(request.getEmail())) {
-            throw new AlreadyRegisteredEmail();
+            throw new AlreadyRegisteredEmailException();
         }
 
         UserEntity entity = UserEntity.builder()
                 .nickname(request.getNickname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role("ROLE_USER") // TODO 권한 수정 필요
+                .role("ROLE_USER")
                 .build();
 
         UserEntity saveEntity = userEntityRepository.save(entity);
@@ -68,6 +67,10 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+
+        UserEntity user = userEntityRepository.findByEmail(request.getEmail())
+                .orElseThrow(UserNotFoundException::new);
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
@@ -83,9 +86,6 @@ public class AuthService {
         LocalDateTime issued = issuedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         Long id = claims.get("id", Long.class);
-
-        UserEntity user = userEntityRepository.findById(id)
-                .orElseThrow(UserNotFoundException::new);
 
         RefreshTokenEntity refreshEntity = RefreshTokenEntity.builder()
                 .expiredAt(expired)
