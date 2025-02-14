@@ -1,8 +1,11 @@
 package com.example.board.auth.persistence.entity;
 
+import com.example.board.article.persistence.entity.ArticleEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+
+import java.util.List;
 
 @Entity
 @Table(name = "user_info")
@@ -34,7 +37,8 @@ public class UserEntity extends BaseEntity {
 
     @Column(name = "role", length = 20, nullable = false)
     @Comment("사용자 권한")
-    private String role; // TODO 추후 Enum 클래스로 변경 필요
+    private String role;
 
-    // TODO 게시글 Entity 연관관계 설정 필요
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ArticleEntity> articles;
 }
