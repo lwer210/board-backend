@@ -1,5 +1,7 @@
 package com.example.board.user.service.impl;
 
+import com.example.board.article.controller.response.ArticleResponse;
+import com.example.board.article.persistence.entity.ArticleEntity;
 import com.example.board.auth.controller.response.UserResponse;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
@@ -38,18 +40,31 @@ public class UserServiceImpl implements UserService {
                 .numberOfElement(all.getNumberOfElements())
                 .build();
 
-        List<UserResponse> list = all.stream()
+        List<UserEntity> content = all.getContent();
+
+        List<UserResponse> list = content.stream()
                 .map(value -> {
+                    List<ArticleResponse> articles = value.getArticles().stream()
+                            .map(article -> {
+                                return ArticleResponse.builder()
+                                        .articleId(article.getId())
+                                        .title(article.getTitle())
+                                        .content(article.getContent())
+                                        .publicYn(article.getPublicYn())
+                                        .build();
+                            }).toList();
+
                     return UserResponse.builder()
                             .id(value.getId())
                             .nickname(value.getNickname())
                             .role(value.getRole())
                             .email(value.getEmail())
+                            .articles(articles)
                             .createdAt(value.getCreatedAt())
                             .updatedAt(value.getUpdatedAt())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return PagingResponse.<UserResponse>builder()
                 .content(list)
@@ -65,11 +80,22 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
+        List<ArticleResponse> articleResponses = user.getArticles().stream()
+                .map(value -> {
+                    return ArticleResponse.builder()
+                            .articleId(value.getId())
+                            .title(value.getTitle())
+                            .content(value.getContent())
+                            .publicYn(value.getPublicYn())
+                            .build();
+                }).toList();
+
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole())
+                .articles(articleResponses)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
@@ -116,11 +142,22 @@ public class UserServiceImpl implements UserService {
 
         UserEntity newUser = userEntityRepository.save(user);
 
+        List<ArticleResponse> articleResponses = newUser.getArticles().stream()
+                .map(value -> {
+                    return ArticleResponse.builder()
+                            .articleId(value.getId())
+                            .title(value.getTitle())
+                            .content(value.getContent())
+                            .publicYn(value.getPublicYn())
+                            .build();
+                }).toList();
+
         return UserResponse.builder()
                 .id(newUser.getId())
                 .email(newUser.getEmail())
                 .nickname(newUser.getNickname())
                 .role(newUser.getRole())
+                .articles(articleResponses)
                 .createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt())
                 .build();
