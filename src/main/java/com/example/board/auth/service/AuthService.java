@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Service
@@ -60,6 +61,7 @@ public class AuthService {
                 .email(saveEntity.getEmail())
                 .id(saveEntity.getId())
                 .role(saveEntity.getRole())
+                .articles(new ArrayList<>())
                 .createdAt(saveEntity.getCreatedAt())
                 .updatedAt(saveEntity.getUpdatedAt())
                 .build();
