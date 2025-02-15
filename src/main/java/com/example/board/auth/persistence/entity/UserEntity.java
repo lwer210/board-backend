@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,5 +41,5 @@ public class UserEntity extends BaseEntity {
     private String role;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ArticleEntity> articles;
+    private List<ArticleEntity> articles = new ArrayList<>();
 }
