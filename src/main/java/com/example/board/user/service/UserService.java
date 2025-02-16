@@ -5,13 +5,14 @@ import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.paging.PagingResponse;
 import com.example.board.user.controller.request.ModifyRequest;
 import com.example.board.user.controller.response.DeleteResponse;
+import com.example.board.user.controller.response.UserInfoResponse;
 import org.springframework.data.domain.Pageable;
 
 
 public interface UserService {
     public PagingResponse<UserResponse> list(Pageable pageable);
 
-    public UserResponse info(CustomUserDetails userDetails);
+    public UserInfoResponse info(CustomUserDetails userDetails);
 
     public DeleteResponse delete(CustomUserDetails userDetails);
 
