@@ -14,6 +14,7 @@ import com.example.board.common.paging.Pagination;
 import com.example.board.common.paging.PagingResponse;
 import com.example.board.user.controller.request.ModifyRequest;
 import com.example.board.user.controller.response.DeleteResponse;
+import com.example.board.user.controller.response.UserInfoResponse;
 import com.example.board.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserEntityRepository userEntityRepository;
 
+    @Override
     public PagingResponse<UserResponse> list(Pageable pageable) {
         Page<UserEntity> all = userEntityRepository.findAll(pageable);
 
@@ -44,22 +46,11 @@ public class UserServiceImpl implements UserService {
 
         List<UserResponse> list = content.stream()
                 .map(value -> {
-                    List<ArticleResponse> articles = value.getArticles().stream()
-                            .map(article -> {
-                                return ArticleResponse.builder()
-                                        .articleId(article.getId())
-                                        .title(article.getTitle())
-                                        .content(article.getContent())
-                                        .publicYn(article.getPublicYn())
-                                        .build();
-                            }).toList();
-
                     return UserResponse.builder()
                             .id(value.getId())
                             .nickname(value.getNickname())
                             .role(value.getRole())
                             .email(value.getEmail())
-                            .articles(articles)
                             .createdAt(value.getCreatedAt())
                             .updatedAt(value.getUpdatedAt())
                             .build();
@@ -72,7 +63,8 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public UserResponse info(CustomUserDetails userDetails) {
+    @Override
+    public UserInfoResponse info(CustomUserDetails userDetails) {
         if(userDetails == null){
             throw new UnauthorizedException();
         }
@@ -80,7 +72,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
-        List<ArticleResponse> articleResponses = user.getArticles().stream()
+        List<ArticleResponse> articles = user.getArticles().stream()
                 .map(value -> {
                     return ArticleResponse.builder()
                             .articleId(value.getId())
@@ -90,17 +82,18 @@ public class UserServiceImpl implements UserService {
                             .build();
                 }).toList();
 
-        return UserResponse.builder()
+        return UserInfoResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .role(user.getRole())
-                .articles(articleResponses)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .articles(articles)
                 .build();
     }
 
+    @Override
     public DeleteResponse delete(CustomUserDetails userDetails) {
         if(userDetails == null){
             throw new UnauthorizedException();
@@ -116,6 +109,7 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
     public UserResponse modify(ModifyRequest request, CustomUserDetails userDetails) {
         if(userDetails == null){
             throw new UnauthorizedException();
@@ -142,22 +136,11 @@ public class UserServiceImpl implements UserService {
 
         UserEntity newUser = userEntityRepository.save(user);
 
-        List<ArticleResponse> articleResponses = newUser.getArticles().stream()
-                .map(value -> {
-                    return ArticleResponse.builder()
-                            .articleId(value.getId())
-                            .title(value.getTitle())
-                            .content(value.getContent())
-                            .publicYn(value.getPublicYn())
-                            .build();
-                }).toList();
-
         return UserResponse.builder()
                 .id(newUser.getId())
                 .email(newUser.getEmail())
                 .nickname(newUser.getNickname())
                 .role(newUser.getRole())
-                .articles(articleResponses)
                 .createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt())
                 .build();
