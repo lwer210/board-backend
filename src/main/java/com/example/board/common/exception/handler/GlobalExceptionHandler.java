@@ -37,7 +37,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {
             UserNotFoundException.class,
-            TokenNotFoundException.class
+            TokenNotFoundException.class,
+            ArticleNotFoundException.class
     })
     public ResponseEntity<ExceptionResponse> userNotFoundExceptionHandler(Exception e){
         ExceptionResponse response = ExceptionResponse.builder()
