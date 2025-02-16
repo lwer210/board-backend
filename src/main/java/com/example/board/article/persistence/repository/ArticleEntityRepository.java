@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ArticleEntityRepository extends JpaRepository<ArticleEntity, Long> {
     Page<ArticleEntity> findAllByPublicYn(Pageable pageable, String publicYn);
+
+    Page<ArticleEntity> findAllByUserIdAndPublicYn(Long userId, String publicYn, Pageable pageable);
 }
