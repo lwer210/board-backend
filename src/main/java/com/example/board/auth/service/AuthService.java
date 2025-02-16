@@ -61,7 +61,6 @@ public class AuthService {
                 .email(saveEntity.getEmail())
                 .id(saveEntity.getId())
                 .role(saveEntity.getRole())
-                .articles(new ArrayList<>())
                 .createdAt(saveEntity.getCreatedAt())
                 .updatedAt(saveEntity.getUpdatedAt())
                 .build();
