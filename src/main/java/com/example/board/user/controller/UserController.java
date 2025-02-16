@@ -6,6 +6,7 @@ import com.example.board.common.exception.response.ExceptionResponse;
 import com.example.board.common.paging.PagingResponse;
 import com.example.board.user.controller.request.ModifyRequest;
 import com.example.board.user.controller.response.DeleteResponse;
+import com.example.board.user.controller.response.UserInfoResponse;
 import com.example.board.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -48,7 +49,7 @@ public class UserController {
     @Operation(summary = "사용자 정보 조회 API", description = "jwt 토큰을 사용하여 인증된 사용자 정보를 조회하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoResponse.class))
             }, description = "성공 시 반환"),
             @ApiResponse(responseCode = "401", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
@@ -60,7 +61,7 @@ public class UserController {
     @GetMapping("/info")
     @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name = "Authentication Bearer")
-    public ResponseEntity<UserResponse> info(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserInfoResponse> info(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.ok(userService.info(userDetails));
     }
