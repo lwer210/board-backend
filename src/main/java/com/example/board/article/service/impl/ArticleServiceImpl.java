@@ -92,7 +92,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleResponse info(Long articleId) {
-        ArticleEntity articleEntity = articleEntityRepository.findById(articleId)
+        ArticleEntity articleEntity = articleEntityRepository.findByIdAndPublicYn(articleId, "Y")
                 .orElseThrow(ArticleNotFoundException::new);
 
         return ArticleResponse.builder()
