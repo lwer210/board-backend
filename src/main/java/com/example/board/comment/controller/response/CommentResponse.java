@@ -17,6 +17,8 @@ public class CommentResponse {
 
     private String answer;
 
+    private Long like;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
