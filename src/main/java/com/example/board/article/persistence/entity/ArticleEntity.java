@@ -2,9 +2,12 @@ package com.example.board.article.persistence.entity;
 
 import com.example.board.auth.persistence.entity.BaseEntity;
 import com.example.board.auth.persistence.entity.UserEntity;
+import com.example.board.comment.persistence.entity.CommentEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -36,4 +39,7 @@ public class ArticleEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_seq", nullable = false)
     private UserEntity user;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentEntity> comment;
 }
