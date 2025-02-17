@@ -1,10 +1,12 @@
 package com.example.board.comment.service;
 
 import com.example.board.comment.controller.request.CommentRequest;
+import com.example.board.comment.controller.response.CommentResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface CommentService {
-    public void add(Long articleSeq, CommentRequest request);
+
+    public CommentResponse add(Long articleSeq, CommentRequest request);
 
     public void list(Long articleSeq, Pageable pageable);
 
