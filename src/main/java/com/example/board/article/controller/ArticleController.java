@@ -22,6 +22,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/article")
 @RequiredArgsConstructor
@@ -68,5 +70,14 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.add(customUserDetails, articleRequest));
     }
 
-
+    @GetMapping("/my/article")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<PagingResponse<ArticleResponse>> myArticle(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ){
+        return ResponseEntity.ok(articleService.getUserArticleList(customUserDetails, pageable));
+    }
 }
