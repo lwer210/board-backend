@@ -25,7 +25,7 @@ public class CommentEntity extends BaseEntity {
     @Comment("댓글")
     private String answer;
 
-    @Column(name = "like")
+    @Column(name = "like_count")
     @Comment("좋아요 수")
     private Long like;
 
