@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface ArticleEntityRepository extends JpaRepository<ArticleEntity, Long> {
     Page<ArticleEntity> findAllByPublicYn(Pageable pageable, String publicYn);
 
-    Page<ArticleEntity> findAllByUserIdAndPublicYn(Long userId, String publicYn, Pageable pageable);
+    Page<ArticleEntity> findAllByUserId(Long userId, Pageable pageable);
 
     Optional<ArticleEntity> findByIdAndPublicYn(Long id, String publicYn);
 }
