@@ -2,6 +2,7 @@ package com.example.board.article.service.impl;
 
 import com.example.board.article.controller.request.ArticleRequest;
 import com.example.board.article.controller.request.UpdateArticleRequest;
+import com.example.board.article.controller.response.ArticleInfoResponse;
 import com.example.board.article.controller.response.ArticleResponse;
 import com.example.board.article.controller.response.DeleteArticleResponse;
 import com.example.board.article.persistence.entity.ArticleEntity;
@@ -9,6 +10,7 @@ import com.example.board.article.persistence.repository.ArticleEntityRepository;
 import com.example.board.article.service.ArticleService;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
+import com.example.board.comment.controller.response.CommentResponse;
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.ArticleNotFoundException;
 import com.example.board.common.exception.UnauthorizedException;
@@ -91,15 +93,27 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleResponse info(Long articleId) {
+    public ArticleInfoResponse info(Long articleId) {
         ArticleEntity articleEntity = articleEntityRepository.findByIdAndPublicYn(articleId, "Y")
                 .orElseThrow(ArticleNotFoundException::new);
 
-        return ArticleResponse.builder()
+        List<CommentResponse> comments = articleEntity.getComment().stream()
+                .map(comment -> {
+                    return CommentResponse.builder()
+                            .commentId(comment.getId())
+                            .answer(comment.getAnswer())
+                            .like(comment.getLike())
+                            .createdAt(comment.getCreatedAt())
+                            .updatedAt(comment.getUpdatedAt())
+                            .build();
+                }).toList();
+
+        return ArticleInfoResponse.builder()
                 .articleId(articleEntity.getId())
                 .title(articleEntity.getTitle())
                 .content(articleEntity.getContent())
                 .publicYn(articleEntity.getPublicYn())
+                .comments(comments)
                 .build();
     }
 
