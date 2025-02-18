@@ -40,6 +40,6 @@ public class ArticleEntity extends BaseEntity {
     @JoinColumn(name = "user_seq", nullable = false)
     private UserEntity user;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "article")
     private List<CommentEntity> comment;
 }
