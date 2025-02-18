@@ -2,6 +2,7 @@ package com.example.board.article.service;
 
 import com.example.board.article.controller.request.ArticleRequest;
 import com.example.board.article.controller.request.UpdateArticleRequest;
+import com.example.board.article.controller.response.ArticleInfoResponse;
 import com.example.board.article.controller.response.ArticleResponse;
 import com.example.board.article.controller.response.DeleteArticleResponse;
 import com.example.board.common.custom.CustomUserDetails;
@@ -14,7 +15,7 @@ public interface ArticleService {
 
     public PagingResponse<ArticleResponse> getUserArticleList(CustomUserDetails userDetails, Pageable pageable);
 
-    public ArticleResponse info(Long articleId);
+    public ArticleInfoResponse info(Long articleId);
 
     public ArticleResponse add(CustomUserDetails userDetails, ArticleRequest request);
 
