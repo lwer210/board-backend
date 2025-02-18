@@ -70,6 +70,15 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.add(customUserDetails, articleRequest));
     }
 
+    @Operation(summary = "본인 게시글 조회 API", description = "로그인한 사용자 본인 게시글 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content ={
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ArticleResponse.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "사용자를 찾지 못했을 경우 반환")
+    })
     @GetMapping("/my/article")
     @PreAuthorize("hasRole('ROLE_USER')")
     @SecurityRequirement(name = "Authentication Bearer")
