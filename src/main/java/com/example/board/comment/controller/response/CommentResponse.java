@@ -15,6 +15,8 @@ public class CommentResponse {
 
     private Long commentId;
 
+    private String nickname;
+
     private String answer;
 
     private Long like;
