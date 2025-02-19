@@ -15,11 +15,11 @@ public interface ArticleService {
 
     public PagingResponse<ArticleResponse> getUserArticleList(CustomUserDetails userDetails, Pageable pageable);
 
-    public ArticleInfoResponse info(Long articleId);
+    public ArticleInfoResponse info(Long articleId, CustomUserDetails customUserDetails);
 
     public ArticleResponse add(CustomUserDetails userDetails, ArticleRequest request);
 
-    public ArticleResponse update(CustomUserDetails userDetails, UpdateArticleRequest request);
+    public ArticleResponse update(CustomUserDetails userDetails, UpdateArticleRequest request, Long articleSeq);
 
-    public DeleteArticleResponse delete(Long articleId);
+    public DeleteArticleResponse delete(Long articleId, CustomUserDetails customUserDetails);
 }
