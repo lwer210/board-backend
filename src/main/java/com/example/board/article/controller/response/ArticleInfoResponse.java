@@ -21,6 +21,4 @@ public class ArticleInfoResponse {
     private String content;
 
     private String publicYn;
-
-    private List<CommentResponse> comments;
 }
