@@ -24,11 +24,11 @@ public class UserEntity extends BaseEntity {
     @Comment("사용자 시퀀스")
     private Long id;
 
-    @Column(name = "email", length = 150, nullable = false)
+    @Column(name = "email", length = 150, nullable = false, unique = true)
     @Comment("사용자 이메일")
     private String email;
 
-    @Column(name = "nickname", length = 100, nullable = false)
+    @Column(name = "nickname", length = 100, nullable = false, unique = true)
     @Comment("사용자 닉네임")
     private String nickname;
 
