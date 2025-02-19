@@ -29,6 +29,10 @@ public class CommentEntity extends BaseEntity {
     @Comment("좋아요 수")
     private Long like;
 
+    @Column(name = "user_seq")
+    @Comment("사용자 시퀀스")
+    private Long userSeq;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_seq", nullable = false)
     private ArticleEntity article;
