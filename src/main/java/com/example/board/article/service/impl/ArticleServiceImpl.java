@@ -67,7 +67,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .orElseThrow(UserNotFoundException::new);
 
         Page<ArticleEntity> page = articleEntityRepository.
-                findAllByUserId(user.getId(), pageable);
+                findAllByUser_Id(user.getId(), pageable);
 
         Pagination pagination = Pagination.builder()
                 .size(page.getSize())
