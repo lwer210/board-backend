@@ -1,12 +1,16 @@
 package com.example.board.article.controller;
 
 import com.example.board.article.controller.request.ArticleRequest;
+import com.example.board.article.controller.request.UpdateArticleRequest;
+import com.example.board.article.controller.response.ArticleInfoResponse;
 import com.example.board.article.controller.response.ArticleResponse;
+import com.example.board.article.controller.response.DeleteArticleResponse;
 import com.example.board.article.service.ArticleService;
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.response.ExceptionResponse;
 import com.example.board.common.paging.PagingResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -88,5 +92,81 @@ public class ArticleController {
             Pageable pageable
     ){
         return ResponseEntity.ok(articleService.getUserArticleList(customUserDetails, pageable));
+    }
+
+    @Operation(summary = "게시글 상세 조회 API", description = "게시글 상세 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ArticleInfoResponse.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "게시글 또는 사용자를 찾지 못했을 경우 반환")
+    })
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{articleSeq}")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<ArticleInfoResponse> info(
+            @Parameter(name = "articleSeq", required = true, description = "게시글 시퀀스")
+            @PathVariable Long articleSeq,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        return ResponseEntity.ok(articleService.info(articleSeq, customUserDetails));
+    }
+
+    @Operation(summary = "게시글 수정 API", description = "게시글 수정 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ArticleResponse.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "게시글 또는 사용자를 찾지 못했을 경우 반환")
+    })
+    @PatchMapping("/update/{articleSeq}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<?> update(
+            @Parameter(name = "articleSeq", description = "게시글 시퀀스", required = true)
+            @PathVariable Long articleSeq,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "게시글 수정 요청 객체",
+                    content = @Content(schema = @Schema(implementation = UpdateArticleRequest.class))
+            )
+            @RequestBody UpdateArticleRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        return ResponseEntity.ok(articleService.update(customUserDetails, request, articleSeq));
+    }
+
+    @Operation(summary = "게시글 삭제 API", description = "게시글 삭제 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = DeleteArticleResponse.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "게시글 또는 사용자를 찾지 못했을 경우 반환")
+    })
+    @DeleteMapping("/{articleSeq}")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<DeleteArticleResponse> delete(
+            @Parameter(name = "articleSeq", description = "게시글 시퀀스", required = true)
+            @PathVariable Long articleSeq,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    )
+    {
+        return ResponseEntity.ok(articleService.delete(articleSeq, customUserDetails));
     }
 }
