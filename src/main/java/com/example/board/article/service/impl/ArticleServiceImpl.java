@@ -99,13 +99,13 @@ public class ArticleServiceImpl implements ArticleService {
             throw new UnauthorizedException();
         }
 
+        UserEntity user = userEntityRepository.findByEmail(customUserDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
         ArticleEntity articleEntity = articleEntityRepository.findById(articleId)
                 .orElseThrow(ArticleNotFoundException::new);
 
         if(articleEntity.getPublicYn().equals("N")){
-
-            UserEntity user = userEntityRepository.findByEmail(customUserDetails.getUsername())
-                    .orElseThrow(UserNotFoundException::new);
 
             boolean empty = user.getArticles().stream()
                     .filter(value -> value.getId().equals(articleId))
@@ -118,23 +118,11 @@ public class ArticleServiceImpl implements ArticleService {
 
         }
 
-        List<CommentResponse> comments = articleEntity.getComment().stream()
-                .map(comment -> {
-                    return CommentResponse.builder()
-                            .commentId(comment.getId())
-                            .answer(comment.getAnswer())
-                            .like(comment.getLike())
-                            .createdAt(comment.getCreatedAt())
-                            .updatedAt(comment.getUpdatedAt())
-                            .build();
-                }).toList();
-
         return ArticleInfoResponse.builder()
                 .articleId(articleEntity.getId())
                 .title(articleEntity.getTitle())
                 .content(articleEntity.getContent())
                 .publicYn(articleEntity.getPublicYn())
-                .comments(comments)
                 .build();
     }
 
