@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateArticleRequest {
 
-    Long articleId;
-
     private String title;
 
     private String content;
