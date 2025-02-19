@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -93,9 +94,29 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleInfoResponse info(Long articleId) {
-        ArticleEntity articleEntity = articleEntityRepository.findByIdAndPublicYn(articleId, "Y")
+    public ArticleInfoResponse info(Long articleId, CustomUserDetails customUserDetails) {
+        if(customUserDetails == null){
+            throw new UnauthorizedException();
+        }
+
+        ArticleEntity articleEntity = articleEntityRepository.findById(articleId)
                 .orElseThrow(ArticleNotFoundException::new);
+
+        if(articleEntity.getPublicYn().equals("N")){
+
+            UserEntity user = userEntityRepository.findByEmail(customUserDetails.getUsername())
+                    .orElseThrow(UserNotFoundException::new);
+
+            boolean empty = user.getArticles().stream()
+                    .filter(value -> value.getId().equals(articleId))
+                    .findFirst()
+                    .isEmpty();
+
+            if(empty){
+                throw new ArticleNotFoundException();
+            }
+
+        }
 
         List<CommentResponse> comments = articleEntity.getComment().stream()
                 .map(comment -> {
@@ -144,13 +165,23 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleResponse update(CustomUserDetails userDetails, UpdateArticleRequest request) {
+    public ArticleResponse update(CustomUserDetails userDetails, UpdateArticleRequest request, Long articleSeq) {
         if(userDetails == null){
             throw new UnauthorizedException();
         }
 
-        ArticleEntity article = articleEntityRepository.findById(request.getArticleId())
-                .orElseThrow(ArticleNotFoundException::new);
+        UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
+        Optional<ArticleEntity> optional = user.getArticles().stream()
+                .filter(value -> value.getId().equals(articleSeq))
+                .findFirst();
+
+        if(optional.isEmpty()){
+            throw new ArticleNotFoundException();
+        }
+
+        ArticleEntity article = optional.get();
 
         if(request.getContent() != null){
             article.setContent(request.getContent());
@@ -173,9 +204,23 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public DeleteArticleResponse delete(Long articleId) {
-        ArticleEntity articleEntity = articleEntityRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+    public DeleteArticleResponse delete(Long articleId, CustomUserDetails customUserDetails) {
+        if(customUserDetails == null){
+            throw new UnauthorizedException();
+        }
+
+        UserEntity user = userEntityRepository.findByEmail(customUserDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
+        Optional<ArticleEntity> article = user.getArticles().stream()
+                .filter(value -> value.getId().equals(articleId))
+                .findFirst();
+
+        if(article.isEmpty()){
+            throw new ArticleNotFoundException();
+        }
+
+        ArticleEntity articleEntity = article.get();
 
         articleEntityRepository.delete(articleEntity);
 
