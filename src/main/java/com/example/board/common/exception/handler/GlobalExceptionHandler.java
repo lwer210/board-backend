@@ -23,6 +23,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {
+            UserSeqNotMatchesException.class
+    })
+    public ResponseEntity<ExceptionResponse> handleUserSeqNotMatchesException(UserSeqNotMatchesException e) {
+        ExceptionResponse response = ExceptionResponse.builder()
+                .message(e.getMessage())
+                .code(HttpStatus.FORBIDDEN.value())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = {
             AlreadyRegisteredEmailException.class,
             AlreadyRegisteredNicknameException.class
     })
@@ -38,7 +50,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             UserNotFoundException.class,
             TokenNotFoundException.class,
-            ArticleNotFoundException.class
+            ArticleNotFoundException.class,
+            CommentNotFoundException.class
     })
     public ResponseEntity<ExceptionResponse> userNotFoundExceptionHandler(Exception e){
         ExceptionResponse response = ExceptionResponse.builder()
