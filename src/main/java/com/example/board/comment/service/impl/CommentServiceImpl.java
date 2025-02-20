@@ -4,11 +4,15 @@ import com.example.board.article.persistence.entity.ArticleEntity;
 import com.example.board.article.persistence.repository.ArticleEntityRepository;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
+import com.example.board.comment.controller.request.CommentLikeRequest;
 import com.example.board.comment.controller.request.CommentRequest;
 import com.example.board.comment.controller.response.CommentResponse;
 import com.example.board.comment.controller.response.DeleteCommentResponse;
 import com.example.board.comment.persistence.entity.CommentEntity;
+import com.example.board.comment.persistence.entity.CommentLikeEntity;
+import com.example.board.comment.persistence.entity.id.CommentLikeId;
 import com.example.board.comment.persistence.repository.CommentEntityRepository;
+import com.example.board.comment.persistence.repository.CommentLikeRepository;
 import com.example.board.comment.service.CommentService;
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.*;
@@ -18,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentEntityRepository commentEntityRepository;
     private final ArticleEntityRepository articleEntityRepository;
     private final UserEntityRepository userEntityRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Override
     public CommentResponse add(Long articleSeq, CommentRequest request, CustomUserDetails customUserDetails) {
@@ -153,7 +159,51 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void countAdd(Long commentSeq, CustomUserDetails customUserDetails) {
+    @Transactional
+    public CommentResponse countAdd(CommentLikeRequest request, CustomUserDetails customUserDetails) {
+        if(customUserDetails == null){
+            throw new UnauthorizedException();
+        }
 
+        UserEntity user = userEntityRepository.findByEmail(customUserDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
+        Long commentSeq = request.getCommentSeq();
+
+        CommentLikeId id = new CommentLikeId(user.getId(), commentSeq);
+        CommentEntity saveComment = new CommentEntity();
+
+        CommentEntity commentEntity = commentEntityRepository.findById(commentSeq)
+                .orElseThrow(CommentNotFoundException::new);
+
+        Long like = commentEntity.getLike();
+
+        if(commentLikeRepository.existsById(id)){
+            commentEntity.setLike(like - 1L);
+
+            saveComment = commentEntityRepository.save(commentEntity);
+
+            commentLikeRepository.deleteById(id);
+
+        }else{
+            commentEntity.setLike(like + 1L);
+
+            saveComment = commentEntityRepository.save(commentEntity);
+
+            CommentLikeEntity entity = CommentLikeEntity.builder()
+                    .id(id)
+                    .build();
+
+            commentLikeRepository.save(entity);
+        }
+
+        return CommentResponse.builder()
+                .commentId(saveComment.getId())
+                .nickname(user.getNickname())
+                .answer(saveComment.getAnswer())
+                .like(saveComment.getLike())
+                .createdAt(saveComment.getCreatedAt())
+                .updatedAt(saveComment.getUpdatedAt())
+                .build();
     }
 }
