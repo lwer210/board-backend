@@ -1,5 +1,6 @@
 package com.example.board.comment.service;
 
+import com.example.board.comment.controller.request.CommentLikeRequest;
 import com.example.board.comment.controller.request.CommentRequest;
 import com.example.board.comment.controller.response.CommentResponse;
 import com.example.board.comment.controller.response.DeleteCommentResponse;
@@ -17,5 +18,5 @@ public interface CommentService {
 
     public DeleteCommentResponse delete(Long commentSeq, CustomUserDetails customUserDetails);
 
-    public void countAdd(Long commentSeq, CustomUserDetails customUserDetails);
+    public CommentResponse countAdd(CommentLikeRequest request, CustomUserDetails customUserDetails);
 }
