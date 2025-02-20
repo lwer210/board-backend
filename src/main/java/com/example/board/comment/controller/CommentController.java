@@ -1,5 +1,6 @@
 package com.example.board.comment.controller;
 
+import com.example.board.comment.controller.request.CommentLikeRequest;
 import com.example.board.comment.controller.request.CommentRequest;
 import com.example.board.comment.controller.response.CommentResponse;
 import com.example.board.comment.controller.response.DeleteCommentResponse;
@@ -133,5 +134,15 @@ public class CommentController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
         return ResponseEntity.ok(commentService.delete(commentSeq, customUserDetails));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/like")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<?> like(
+            @RequestBody CommentLikeRequest request,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        return ResponseEntity.ok(commentService.countAdd(request, customUserDetails));
     }
 }
