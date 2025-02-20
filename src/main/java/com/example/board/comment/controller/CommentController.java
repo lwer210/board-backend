@@ -118,6 +118,9 @@ public class CommentController {
             @ApiResponse(responseCode = "200", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = DeleteCommentResponse.class))
             }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
             @ApiResponse(responseCode = "403", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
             }, description = "다른 사용자가 작성한 댓글을 수정하려할 경우 반환"),
@@ -136,10 +139,27 @@ public class CommentController {
         return ResponseEntity.ok(commentService.delete(commentSeq, customUserDetails));
     }
 
+    @Operation(summary = "댓글 좋아요 API", description = "댓글 좋아요 추가 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = CommentResponse.class))
+            }, description = "성공 시 반환"),
+            @ApiResponse(responseCode = "401", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "인증되지 않은 사용자일 경우 반환"),
+            @ApiResponse(responseCode = "404", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionResponse.class))
+            }, description = "댓글 또는 사용자를 찾지 못했을 경우 반환")
+    })
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/like")
     @SecurityRequirement(name = "Authentication Bearer")
-    public ResponseEntity<?> like(
+    public ResponseEntity<CommentResponse> like(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "댓글 좋아요 추가 요청 객체",
+                    content = @Content(schema = @Schema(implementation = CommentLikeRequest.class))
+            )
             @RequestBody CommentLikeRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
