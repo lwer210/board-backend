@@ -160,7 +160,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponse countAdd(CommentLikeRequest request, CustomUserDetails customUserDetails) {
+    public CommentResponse likeAdd(CommentLikeRequest request, CustomUserDetails customUserDetails) {
         if(customUserDetails == null){
             throw new UnauthorizedException();
         }

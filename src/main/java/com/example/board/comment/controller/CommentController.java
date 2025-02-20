@@ -143,6 +143,6 @@ public class CommentController {
             @RequestBody CommentLikeRequest request,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
-        return ResponseEntity.ok(commentService.countAdd(request, customUserDetails));
+        return ResponseEntity.ok(commentService.likeAdd(request, customUserDetails));
     }
 }

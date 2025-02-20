@@ -18,5 +18,5 @@ public interface CommentService {
 
     public DeleteCommentResponse delete(Long commentSeq, CustomUserDetails customUserDetails);
 
-    public CommentResponse countAdd(CommentLikeRequest request, CustomUserDetails customUserDetails);
+    public CommentResponse likeAdd(CommentLikeRequest request, CustomUserDetails customUserDetails);
 }
