@@ -10,7 +10,6 @@ import com.example.board.article.persistence.repository.ArticleEntityRepository;
 import com.example.board.article.service.ArticleService;
 import com.example.board.auth.persistence.entity.UserEntity;
 import com.example.board.auth.persistence.repository.UserEntityRepository;
-import com.example.board.comment.controller.response.CommentResponse;
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.ArticleNotFoundException;
 import com.example.board.common.exception.UnauthorizedException;
@@ -128,6 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleResponse add(CustomUserDetails userDetails, ArticleRequest request) {
+
         if(userDetails == null){
             throw new UnauthorizedException();
         }
@@ -135,20 +135,26 @@ public class ArticleServiceImpl implements ArticleService {
         UserEntity user = userEntityRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(UserNotFoundException::new);
 
-        ArticleEntity entity = ArticleEntity.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .publicYn(request.getPublicYn())
-                .user(user)
-                .build();
+        ArticleEntity entity  = ArticleEntity.builder()
+                    .title(request.getTitle())
+                    .content(request.getContent())
+                    .publicYn(request.getPublicYn())
+                    .fileUseYn(request.getFileUseYn())
+                    .fileSeq(request.getFileSeq())
+                    .user(user)
+                    .build();
 
-        articleEntityRepository.save(entity);
+        ArticleEntity save = articleEntityRepository.save(entity);
 
         return ArticleResponse.builder()
-                .articleId(entity.getId())
-                .title(request.getTitle())
-                .content(request.getContent())
-                .publicYn(request.getPublicYn())
+                .articleId(save.getId())
+                .title(save.getTitle())
+                .content(save.getContent())
+                .publicYn(save.getPublicYn())
+                .fileSeq(save.getFileSeq())
+                .fileUseYn(save.getFileUseYn())
+                .createdAt(save.getCreatedAt())
+                .updatedAt(save.getUpdatedAt())
                 .build();
     }
 
@@ -181,6 +187,14 @@ public class ArticleServiceImpl implements ArticleService {
             article.setPublicYn(request.getPublicYn());
         }
 
+        if(request.getFileUseYn() != null){
+            article.setFileUseYn(request.getFileUseYn());
+        }
+
+        if(request.getFileUseYn().equals("Y") && request.getFileSeq() != null){
+            article.setFileSeq(request.getFileSeq());
+        }
+
         ArticleEntity save = articleEntityRepository.save(article);
 
         return ArticleResponse.builder()
@@ -188,6 +202,10 @@ public class ArticleServiceImpl implements ArticleService {
                 .title(save.getTitle())
                 .content(save.getContent())
                 .publicYn(save.getPublicYn())
+                .fileSeq(save.getFileSeq())
+                .fileUseYn(save.getFileUseYn())
+                .createdAt(save.getCreatedAt())
+                .updatedAt(save.getUpdatedAt())
                 .build();
     }
 
