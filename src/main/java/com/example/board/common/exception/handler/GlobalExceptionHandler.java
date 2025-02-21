@@ -52,7 +52,8 @@ public class GlobalExceptionHandler {
             UserNotFoundException.class,
             TokenNotFoundException.class,
             ArticleNotFoundException.class,
-            CommentNotFoundException.class
+            CommentNotFoundException.class,
+            FileNotFoundException.class,
     })
     public ResponseEntity<ExceptionResponse> userNotFoundExceptionHandler(Exception e){
         ExceptionResponse response = ExceptionResponse.builder()
