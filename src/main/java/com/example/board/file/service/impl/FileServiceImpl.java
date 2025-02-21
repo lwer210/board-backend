@@ -3,17 +3,24 @@ package com.example.board.file.service.impl;
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.EmptyFileException;
 import com.example.board.common.exception.FileException;
+import com.example.board.common.exception.FileNotFoundException;
 import com.example.board.common.exception.UnauthorizedException;
+import com.example.board.file.controller.dto.DownloadFileDto;
 import com.example.board.file.controller.response.FileResponse;
 import com.example.board.file.persistence.entity.FileEntity;
 import com.example.board.file.persistence.repository.FileEntityRepository;
 import com.example.board.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,7 +89,37 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void download() {
+    public DownloadFileDto download(Long fileSeq, CustomUserDetails customUserDetails) {
+        FileEntity file = fileEntityRepository.findById(fileSeq)
+                .orElseThrow(FileNotFoundException::new);
 
+        String path = file.getSavePath();
+        Path filePath = Paths.get(path).normalize();
+
+        if(!Files.exists(filePath)) {
+            throw new FileNotFoundException();
+        }
+
+        Resource resource = null;
+        try{
+            resource = new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e); // TODO 예외 교체 필요
+        }
+
+        String fileName = file.getOriginalFileName().replaceAll(" ", "_");
+        try{
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e); // TODO 예외 교체 필요
+        }
+
+        String contentDisposition = "attachment; filename=\"" + fileName + "\"";
+
+        return DownloadFileDto.builder()
+                .contentDisposition(contentDisposition)
+                .resource(resource)
+                .build();
     }
 }
