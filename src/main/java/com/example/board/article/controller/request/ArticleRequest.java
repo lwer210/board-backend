@@ -15,4 +15,6 @@ public class ArticleRequest {
 
     private String publicYn;
 
+    private Long fileSeq;
+
 }
