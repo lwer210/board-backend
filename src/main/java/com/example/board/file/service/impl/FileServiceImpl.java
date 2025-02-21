@@ -1,7 +1,9 @@
 package com.example.board.file.service.impl;
 
+import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.EmptyFileException;
 import com.example.board.common.exception.FileException;
+import com.example.board.common.exception.UnauthorizedException;
 import com.example.board.file.controller.response.FileResponse;
 import com.example.board.file.persistence.entity.FileEntity;
 import com.example.board.file.persistence.repository.FileEntityRepository;
@@ -27,7 +29,10 @@ public class FileServiceImpl implements FileService {
     private final FileEntityRepository fileEntityRepository;
 
     @Override
-    public FileResponse upload(MultipartFile file) {
+    public FileResponse upload(MultipartFile file, CustomUserDetails customUserDetails) {
+        if(customUserDetails == null){
+            throw new UnauthorizedException();
+        }
 
         if(file == null || file.isEmpty()) {
             throw new EmptyFileException();
@@ -74,7 +79,6 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
             throw new FileException("파일 업로드에 실패하였습니다.");
         }
-
     }
 
     @Override
