@@ -36,6 +36,14 @@ public class ArticleEntity extends BaseEntity {
     @Comment("게시글 본문")
     private String content;
 
+    @Column(name = "file_seq")
+    @Comment("파일 시퀀스")
+    private Long fileSeq;
+
+    @Column(name = "file_use_yn")
+    @Comment("파일 사용 여부")
+    private String fileUseYn;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_seq", nullable = false)
     private UserEntity user;
