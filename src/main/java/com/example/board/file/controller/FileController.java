@@ -2,6 +2,7 @@ package com.example.board.file.controller;
 
 import com.example.board.common.custom.CustomUserDetails;
 import com.example.board.common.exception.response.ExceptionResponse;
+import com.example.board.file.controller.dto.DownloadFileDto;
 import com.example.board.file.controller.response.FileResponse;
 import com.example.board.file.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,14 +14,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -55,5 +55,23 @@ public class FileController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ){
         return ResponseEntity.ok(fileService.upload(file, customUserDetails));
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/download")
+    @SecurityRequirement(name = "Authentication Bearer")
+    public ResponseEntity<Resource> download(
+            @RequestParam(name = "fileSeq") Long fileSeq,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        DownloadFileDto dto = fileService.download(fileSeq, customUserDetails);
+
+        Resource resource = dto.getResource();
+        String contentDisposition = dto.getContentDisposition();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 }
