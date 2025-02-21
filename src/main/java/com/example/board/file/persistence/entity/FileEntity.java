@@ -16,7 +16,7 @@ import org.hibernate.annotations.Comment;
         name = "file_seq_generator",
         sequenceName = "file_seq",
         initialValue = 1,
-        allocationSize = 50
+        allocationSize = 1
 )
 public class FileEntity extends BaseEntity {
 
