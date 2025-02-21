@@ -15,5 +15,7 @@ public class UpdateArticleRequest {
 
     private String publicYn;
 
+    private String fileUseYn;
+
     private Long fileSeq;
 }
