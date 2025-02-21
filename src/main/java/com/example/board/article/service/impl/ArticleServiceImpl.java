@@ -139,7 +139,7 @@ public class ArticleServiceImpl implements ArticleService {
                     .title(request.getTitle())
                     .content(request.getContent())
                     .publicYn(request.getPublicYn())
-                    .fileUseYn(request.getFileUseYn())
+                    .fileUseYn(request.getFileUseYn() != null ? request.getFileUseYn() : "N")
                     .fileSeq(request.getFileSeq())
                     .user(user)
                     .build();
