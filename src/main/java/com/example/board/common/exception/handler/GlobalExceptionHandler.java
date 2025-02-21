@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {
-            NewPasswordNotMatchesException.class
+            NewPasswordNotMatchesException.class,
+            EmptyFileException.class
     })
-    public ResponseEntity<ExceptionResponse> handleNewPasswordNotMatchesException(NewPasswordNotMatchesException e) {
+    public ResponseEntity<ExceptionResponse> handleNewPasswordNotMatchesException(Exception e) {
         ExceptionResponse response = ExceptionResponse.builder()
                 .message(e.getMessage())
                 .code(HttpStatus.BAD_REQUEST.value())
@@ -64,7 +65,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {
             EmailSendFailedException.class,
-            ParseTokenException.class
+            ParseTokenException.class,
+            FileException.class
     })
     public ResponseEntity<ExceptionResponse> emailSendFailedExceptionHandler(Exception e){
         ExceptionResponse response = ExceptionResponse.builder()
